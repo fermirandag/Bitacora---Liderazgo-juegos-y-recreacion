@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitácora: Liderazgo, Juegos y Recreación</title>
+    <style>
+        /* --- ESTILOS GENERALES Y RESPONSIVOS --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fcfcfc;
+            color: #333;
+            padding-bottom: 60px; /* Espacio para que el footer no tape contenido */
+        }
+
+        header {
+            background-color: #7b1fa2;
+            color: white;
+            text-align: center;
+            padding: 2rem 1rem 1.5rem 1rem;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+
+        header p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        /* --- SISTEMA DE PESTAÑAS (TABS) --- */
+        .contenedor-pestanas {
+            display: flex;
+            flex-wrap: wrap; /* Permite que las pestañas se acomoden en celus si no caben */
+            justify-content: center;
+            background-color: #f1f3f5;
+            border-bottom: 2px solid #e9ecef;
+            position: sticky;
+            top: 0;
+            z-index: 100; /* Mantiene el menú fijo arriba al hacer scroll */
+        }
+
+        .boton-tab {
+            background: none;
+            border: none;
+            outline: none;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #495057;
+            border-bottom: 4px solid transparent;
+        }
+
+        /* Colores sutiles al pasar el mouse por encima */
+        .boton-tab:hover {
+            background-color: rgba(0,0,0,0.03);
+        }
+
+        /* Estilos específicos para cuando una pestaña está activa (seleccionada) */
+        .boton-tab.activa[data-target="informacion"] {
+            border-bottom-color: #9c27b0;
+            color: #7b1fa2;
+        }
+        .boton-tab.activa[data-target="juegos"] {
+            border-bottom-color: #e91e63;
+            color: #c2185b;
+        }
+        .boton-tab.activa[data-target="dinamicas"] {
+            border-bottom-color: #fbc02d;
+            color: #f57f17;
+        }
+        .boton-tab.activa[data-target="aplausos"] {
+            border-bottom-color: #00bcd4;
+            color: #0097a7;
+        }
+
+        /* --- SECCIONES DE CONTENIDO --- */
+        .seccion {
+            padding: 2.5rem 1.5rem;
+            display: none; /* TRUCO: Por defecto todas las secciones están ocultas */
+        }
+
+        /* Clase CSS que usaremos con JavaScript para mostrar la sección activa */
+        .seccion.activa {
+            display: block;
+        }
+
+        .seccion-titulo {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-top: 0;
+            margin-bottom: 2rem;
+            color: #2c3e50;
+        }
+
+        /* --- GRID RESPONSIVO PARA VIDEOS --- */
+        .grid-videos {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .tarjeta-video {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .tarjeta-video .info {
+            padding: 1rem;
+        }
+
+        .tarjeta-video h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.1rem;
+        }
+
+        .contenedor-youtube {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        .contenedor-youtube iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        /* --- COLORES DE FONDO TEMÁTICOS --- */
+        #informacion { background-color: #fdfbff; }
+        #juegos { background-color: #fff5f7; }
+        #dinamicas { background-color: #fffde6; }
+        #aplausos { background-color: #f0fdfa; }
+
+        /* Contenedor Info General */
+        .contenedor-info {
+            max-width: 750px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border-top: 5px solid #9c27b0;
+        }
+
+        .lista-integrantes {
+            list-style: none;
+            padding: 0;
+        }
+
+        .lista-integrantes li {
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #eee;
+            font-size: 1.05rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: #7b1fa2;
+            color: white;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Bitácora</h1>
+        <p>Liderazgo, Juegos y Recreación</p>
+    </header>
+
+    <!-- MENÚ DE PESTAÑAS (BOTONES) -->
+    <nav class="contenedor-pestanas">
+        <!-- El atributo data-target le dice a JavaScript qué sección debe abrir -->
+        <button class="boton-tab activa" data-target="informacion">📋 Info General</button>
+        <button class="boton-tab" data-target="juegos">🕹️ Juegos</button>
+        <button class="boton-tab" data-target="dinamicas">👥 Dinámicas</button>
+        <button class="boton-tab" data-target="aplausos">👏 Aplausos</button>
+    </nav>
+
+    <!-- SECCIÓN 4: INFORMACIÓN GENERAL (MORADO) - Inicia activa -->
+    <section id="informacion" class="seccion activa">
+        <h2 class="seccion-titulo">Información General</h2>
+        <div class="contenedor-info">
+            <h3>Integrantes del Grupo</h3>
+            <ul class="lista-integrantes">
+                <li>👤 Ximena Equiguren</li>
+                <li>👤 Maximiliano Gallegos</li>
+                <li>👤 Fernanda Miranda</li>
+                <li>👤 Melani Vignati</li>
+                <li>👤 Ke Ying Rao</li>
+            </ul>
+            
+            <p><strong>Liderazgo, juegos y recreación - Sección 4</strong></p>
+        </div>
+    </section>
+
+    <!-- SECCIÓN 1: JUEGOS (ROSADO) -->
+    <section id="juegos" class="seccion">
+        <h2 class="seccion-titulo">🕹️ Registro de Juegos</h2>
+        <div class="grid-videos">
+            
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://youtu.be/OPf0YbXqDm0?si=2wsvKsrWZv6RVl36" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>Juego #1: Nombre</h3>
+                    <p>Descripción breve del juego.</p>
+                </div>
+            </div>
+
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>Juego #2: Nombre</h3>
+                    <p>Descripción breve del juego.</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECCIÓN 2: DINÁMICAS (AMARILLO) -->
+    <section id="dinamicas" class="seccion">
+        <h2 class="seccion-titulo">👥 Registro de Dinámicas</h2>
+        <div class="grid-videos">
+            
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>Dinámica #1: Nombre</h3>
+                    <p>Descripción de la dinámica.</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECCIÓN 3: APLAUSOS (CELESTE) -->
+    <section id="aplausos" class="seccion">
+        <h2 class="seccion-titulo">👏 Registro de Aplausos</h2>
+        <div class="grid-videos">
+            
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#1 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#2 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#3 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#4 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#5 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#6 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#7 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#8 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#9 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#10 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#11 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#12 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#13 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#14 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#15 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#16 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#17 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#18 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#19 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#20 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#21 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#22 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#23 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#24 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#25 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#26 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#27 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#28 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#29 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#30 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#31 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#32 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#33 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#34 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#35 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#36 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#37 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#38 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#39 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#40 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#41 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#42 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#43 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#44 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#45 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#46 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#47 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#48 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#49 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#50 Aplauso: </h3>
+                </div>
+            </div>
+            <div class="tarjeta-video">
+                <div class="contenedor-youtube">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <h3>#51 Aplauso: </h3>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <footer>
+        <p>Bitácora Grupo 1 😎</p>
+    </footer>
+
+    <!-- --- CÓDIGO JAVASCRIPT PARA EL MANEJO DE PESTAÑAS --- -->
+    <script>
+        // Seleccionamos todos los botones y todas las secciones
+        const botones = document.querySelectorAll('.boton-tab');
+        const secciones = document.querySelectorAll('.seccion');
+
+        botones.forEach(boton => {
+            boton.addEventListener('click', () => {
+                // 1. Quitar la clase 'activa' de todos los botones
+                botones.forEach(b => b.classList.remove('activa'));
+                // 2. Quitar la clase 'activa' de todas las secciones (las oculta)
+                secciones.forEach(s => s.classList.remove('activa'));
+
+                // 3. Agregar la clase 'activa' al botón presionado
+                boton.classList.add('activa');
+                
+                // 4. Obtener el id de la sección que queremos mostrar
+                const targetId = boton.getAttribute('data-target');
+                // 5. Mostrar la sección correspondiente
+                document.getElementById(targetId).classList.add('activa');
+                
+                // Extra: Sube el scroll automáticamente al inicio de la sección para comodidad del usuario
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+    </script>
+
+</body>
+</html>
